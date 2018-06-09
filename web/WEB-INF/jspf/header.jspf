@@ -1,0 +1,59 @@
+<%@page import="br.com.fatecpg.parking.db.User" %>
+<%@ page pageEncoding="UTF-8" %>
+<h1>WebParking</h1>
+<%
+    String headerMessage = null;
+    if(request.getParameter("loginForm")!=null){
+       String login = request.getParameter("login");
+       String pass = request.getParameter("pass");
+       User u = User.validateUser(login, pass);
+       if(u!=null){
+           session.setAttribute("me.id", u.getId());
+           session.setAttribute("me.role", u.getRole());
+           session.setAttribute("me.name", u.getName());
+           session.setAttribute("me.login", u.getLogin());
+           session.setAttribute("me.passwordHash", u.getPasswordHash());
+           response.sendRedirect(request.getRequestURI());
+       }else{
+           headerMessage = "Login ou senha inválidos!";
+       }
+       
+    }
+    if(request.getParameter("logoffForm")!=null){
+        session.removeAttribute("me.id");
+        session.removeAttribute("me.role");
+        session.removeAttribute("me.name");
+        session.removeAttribute("me.login");
+        session.removeAttribute("me.passwordHash");
+        response.sendRedirect(request.getRequestURI());
+    }
+%>
+
+<%if(session.getAttribute("me.login")==null){%>
+    <form method="post">
+       Login:<input type="text" name="login"/>
+       Senha:<input type="text" name="pass"/>
+       <input type="submit" name="loginForm" value="Entrar"/>
+    
+    </form>
+<%}else{%>
+<form>
+    Bem vindo, <%=session.getAttribute("me.name")%>
+    [<%= session.getAttribute("me.role")%>]
+    <input type="submit" name="logoffForm" value="Sair"/>
+</form>
+    <hr>
+    <h2>
+        <%String path = request.getContextPath();%>
+        <a href="<%=path%>/home.jsp">HOME</a> |
+        | <a href="<%=path%>/home.jsp">VAGAS</a> |
+        | <a href="<%=path%>/home.jsp">HISTÓRICO</a> |
+        <%if(session.getAttribute("me.role").equals("ADMIN")){%>
+        | ADMIN [<a href="<%=path%>/home.jsp">USUÁRIOS</a>]
+    </h2>
+    
+<%}%>
+<%if(headerMessage!=null) {%>
+<h3 style="background-color: red; color: white"><%=headerMessage%></h3>
+<%}%>
+<hr>
